@@ -112,7 +112,7 @@ function drawStickFigure(el, x, y, facing) {
 
 }
 
-function drawLines(canvas){//#const c = document.getElementById("canvas4").getContext("2d");
+function drawLines(canvas){
     canvas = canvas.getContext("2d");
     canvas.beginPath();
     canvas.moveTo(100, 100);
@@ -132,6 +132,7 @@ function drawTriangle(canvas, x1, y1, x2, y2, x3, y3){
     c.moveTo(x1, y1);
     c.lineTo(x2, y2);
     c.lineTo(x3, y3);
+    c.lineTo(x1, y1);
     c.outlineColor = "#FF0000";
     c.fill();
     c.stroke();
