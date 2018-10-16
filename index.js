@@ -134,6 +134,7 @@ function drawTriangle(canvas, x1, y1, x2, y2, x3, y3){
     c.lineTo(x3, y3);
     c.outlineColor = "#FF0000";
     c.fill();
+    c.stroke();
 }
 
 function drawGrid(canvas){
@@ -171,6 +172,107 @@ function drawCzechFlag(canvas){
 
 function drawSpartacus(canvas){
     drawStickFigure(canvas, 50, 150, 180);
+
+    let cc = canvas;
+    let c = canvas.getContext("2d");
+
+    let speed = 20;
+    let distanceWalked = 0;
+    let walking = false;
+
+    let positionX = Math.floor(Math.random()*(canvas.width-100)+50);
+    let positionY = Math.floor(Math.random()*(canvas.height-120)+100);
+    let targetX = positionX;
+    let targetY = positionY;
+
+    canvas.addEventListener('click', setNewTarget);
+
+    updateAndDrawCurrentState();
+
+    function startWalking(c, canvas){
+        if (walking){
+            return
+        }
+
+        walking = true;
+        elapsedTime();
+        updateAndDrawCurrentState(c, canvas)
+    }
+
+    function stopWalking(){
+        walking = false;
+    }
+
+    function updateAndDrawCurrentState(){
+        console.log(c, targetX, targetY);
+        console.error(canvas);
+        c.clearRect(0, 0, canvas.width, canvas.height);
+        cross(c, targetX, targetY);
+
+        const distance = Math.sqrt(Math.pow(targetX-positionX, 2) + Math.pow(targetY-positionY, 2));
+
+        if (distance<1) {
+            drawStickFigure(canvas, positionX, positionY, canvas);
+            distanceWalked = 0;
+            stopWalking();
+            return;
+        }
+
+        let walkedNow = speed * elapsedTime();
+        if (walkedNow > distance){
+            walkedNow = distance;
+        }
+        let direction = Math.acos((targetX-positionX)/distance);
+        if ((targetY-positionY) < 0) {
+            direction = -direction;
+        }
+        positionX = positionX + Math.cos(direction) * walkedNow;
+        positionY = positionY + Math.sin(direction) * walkedNow;
+        distanceWalked += walkedNow;
+
+        drawStickFigure(canvas, positionX, positionY, 180);
+        if (walking) requestAnimationFrame(updateAndDrawCurrentState);
+    }
+
+    function setNewTarget(event) {
+        const click = getClickCoordinates(event, cc);
+        // 2 is the width of the border we've given our canvas
+        const c = cc.getContext("2d");
+        targetX = click.left-2;
+        targetY = click.top-2;
+        console.log(cc);
+        startWalking(c, canvas);
+    }
+
+    function cross(c, targetX, targetY){
+        line(c, targetX-10, targetY, targetX+10, targetY);
+        line(c, targetX, targetY-10, targetX, targetY+10);
+    }
+
+    function line(c, x1, y1, x2, y2) {
+        c.beginPath();
+        c.moveTo(x1,y1);
+        c.lineTo(x2,y2);
+        c.stroke();
+    }
+
+    function getClickCoordinates(event, element) {
+        const rect = element.getBoundingClientRect();
+
+        return {
+            left: event.clientX - rect.left,
+            top: event.clientY - rect.top,
+        };
+    }
+}
+
+let lastTime = null;
+function elapsedTime() {
+    if (!lastTime) lastTime = Date.now();
+    const currentTime = Date.now();
+    const timeElapsed = currentTime - lastTime;
+    lastTime = currentTime;
+    return timeElapsed/1000;
 }
 
 function drawEyes(canvas){
